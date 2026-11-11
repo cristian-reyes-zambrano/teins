@@ -38,8 +38,8 @@ Future<void> main() async {
   // 3. Inicializar conectividad
   await sl<ConnectivityService>().initialize();
 
-  // 4. Si hay sesión activa, inicializar PowerSync
-  await _initPowerSyncIfAuthenticated();
+  // 4. PowerSync se inicializa después del login — no al arrancar
+  // Esto evita loops de credenciales cuando no hay sesión activa.
 
   AppLogger.i('App TEINS iniciada [${AppConfig.environment.name}]');
 

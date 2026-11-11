@@ -20,8 +20,13 @@ class VisitLocalDatasourceImpl implements VisitLocalDatasource {
 
   static const _table = 'visits';
 
+  Future<void> _ensureInitialized() async {
+    if (!_db.isInitialized) await _db.initialize();
+  }
+
   @override
   Stream<List<VisitModel>> watchByTechnician(String technicianId) {
+    if (!_db.isInitialized) return Stream.value(<VisitModel>[]);
     return _db
         .watch(
           'SELECT * FROM $_table WHERE technician_id = ? '
@@ -34,6 +39,7 @@ class VisitLocalDatasourceImpl implements VisitLocalDatasource {
   @override
   Future<List<VisitModel>> getByTechnician(String technicianId) async {
     try {
+      await _ensureInitialized();
       final rows = await _db.getAll(
         'SELECT * FROM $_table WHERE technician_id = ? '
         'ORDER BY created_at DESC',
@@ -52,6 +58,7 @@ class VisitLocalDatasourceImpl implements VisitLocalDatasource {
   @override
   Future<VisitModel?> getById(String visitId) async {
     try {
+      await _ensureInitialized();
       final row = await _db.getOptional(
         'SELECT * FROM $_table WHERE id = ?',
         [visitId],
@@ -69,30 +76,18 @@ class VisitLocalDatasourceImpl implements VisitLocalDatasource {
   @override
   Future<void> upsert(VisitModel model) async {
     try {
+      await _ensureInitialized();
+      // PowerSync usa vistas sobre sus tablas internas.
+      // Las vistas soportan INSERT OR REPLACE pero NO ON CONFLICT DO UPDATE.
       await _db.execute(
         '''
-        INSERT INTO $_table (
+        INSERT OR REPLACE INTO $_table (
           id, technician_id, client_id, client_name, title, description,
           visit_type, address, status, sync_status, form_template_id,
           form_template_version, observations,
           created_at, updated_at, started_at, completed_at,
           latitude, longitude
         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO UPDATE SET
-          title = excluded.title,
-          description = excluded.description,
-          address = excluded.address,
-          status = excluded.status,
-          sync_status = excluded.sync_status,
-          form_template_id = excluded.form_template_id,
-          form_template_version = excluded.form_template_version,
-          observations = excluded.observations,
-          updated_at = excluded.updated_at,
-          started_at = excluded.started_at,
-          completed_at = excluded.completed_at,
-          latitude = excluded.latitude,
-          longitude = excluded.longitude,
-          client_name = excluded.client_name
         ''',
         [
           model.id,

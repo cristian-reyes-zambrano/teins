@@ -11,14 +11,14 @@ class AppConfig {
   /// URL del proyecto Supabase. Proviene de --dart-define=SUPABASE_URL=...
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://your-project.supabase.co',
+    defaultValue: 'https://lnsqfnkhblosbusewvua.supabase.co',
   );
 
   /// Clave pública anon de Supabase (safe para cliente móvil).
   /// Nunca usar service_role key en la app.
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: '',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc3FmbmtoYmxvc2J1c2V3dnVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0Mzg3NDUsImV4cCI6MjEwODAxNDc0NX0._PqIFqjScrmHO2DqyzgQ0o17B1o4uDyXma0phcGZkcs',
   );
 
   // ── PowerSync ─────────────────────────────────────────────────────────────
@@ -26,7 +26,7 @@ class AppConfig {
   /// URL de la instancia PowerSync para sincronización offline.
   static const String powerSyncUrl = String.fromEnvironment(
     'POWERSYNC_URL',
-    defaultValue: 'https://your-instance.powersync.journeyapps.com',
+    defaultValue: 'https://6ad67ee13b1803753bd3182f.powersync.journeyapps.com',
   );
 
   // ── Entorno ───────────────────────────────────────────────────────────────

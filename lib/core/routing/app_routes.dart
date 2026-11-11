@@ -20,6 +20,11 @@ class AppRoutes {
   // Helpers para construir rutas con parámetros
   static String visitDetailPath(String visitId) => '/visits/$visitId';
   static String visitFormPath(String visitId) => '/visits/$visitId/form';
+  static String visitFormSelectPath(String visitId, String visitType) =>
+      '/visits/$visitId/form-select?visitType=$visitType';
+  static String visitFormWithTemplatePath(
+          String visitId, String templateId, String visitType) =>
+      '/visits/$visitId/form?templateId=$templateId&visitType=$visitType';
   static String visitMaterialsPath(String visitId) =>
       '/visits/$visitId/materials';
   static String visitPhotosPath(String visitId) => '/visits/$visitId/photos';

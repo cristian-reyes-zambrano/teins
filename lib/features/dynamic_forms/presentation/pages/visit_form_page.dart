@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_bar_back.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/connectivity_banner.dart';
@@ -14,13 +15,21 @@ import '../widgets/form_section_widget.dart';
 
 /// Página principal del formulario técnico dinámico.
 ///
-/// Carga la plantilla según el tipo de visita, renderiza las secciones
-/// con sus campos y gestiona autosave debounced.
-/// Funciona completamente offline.
+/// Acepta parámetros opcionales overrideTemplateId y overrideVisitType
+/// para soporte multi-formulario (desde FormSelectorPage).
 class VisitFormPage extends ConsumerStatefulWidget {
-  const VisitFormPage({super.key, required this.visitId});
+  const VisitFormPage({
+    super.key,
+    required this.visitId,
+    this.overrideTemplateId,
+    this.overrideVisitType,
+  });
 
   final String visitId;
+  /// templateId específico (cuando viene del selector multi-formulario).
+  final String? overrideTemplateId;
+  /// visitType específico (cuando viene del selector multi-formulario).
+  final String? overrideVisitType;
 
   @override
   ConsumerState<VisitFormPage> createState() => _VisitFormPageState();
@@ -43,25 +52,29 @@ class _VisitFormPageState extends ConsumerState<VisitFormPage> {
 
     return visitAsync.when(
       loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Formulario técnico')),
+        appBar: AppBarBack(title: const Text('Formulario técnico')),
         body: const AppLoading(message: 'Cargando visita...'),
       ),
       error: (e, _) => Scaffold(
-        appBar: AppBar(title: const Text('Formulario técnico')),
+        appBar: AppBarBack(title: const Text('Formulario técnico')),
         body: const AppErrorWidget(message: 'Error al cargar la visita.'),
       ),
       data: (either) => either.fold(
         (failure) => Scaffold(
-          appBar: AppBar(title: const Text('Formulario técnico')),
+          appBar: AppBarBack(title: const Text('Formulario técnico')),
           body: AppErrorWidget(message: failure.message),
         ),
         (visit) {
-          final providerKey = (widget.visitId, visit.visitType);
+          // Si viene del selector multi-formulario, usa el tipo override.
+          // Si no, usa el tipo de la visita (comportamiento original).
+          final effectiveVisitType =
+              widget.overrideVisitType ?? visit.visitType;
+          final providerKey = (widget.visitId, effectiveVisitType);
           final formState = ref.watch(formEditorProvider(providerKey));
 
           return _FormScaffold(
             visitId: widget.visitId,
-            visitType: visit.visitType,
+            visitType: effectiveVisitType,
             formState: formState,
             sectionKeyBuilder: _keyForSection,
             onFieldChanged: (fieldId, value) => ref
@@ -121,14 +134,14 @@ class _FormScaffold extends StatelessWidget {
 
     if (template == null && formState.failure == null) {
       return Scaffold(
-        appBar: _buildAppBar(context, null),
+        appBar: AppBarBack(title: const Text('Formulario técnico')),
         body: const AppLoading(message: 'Cargando formulario...'),
       );
     }
 
     if (formState.failure != null && template == null) {
       return Scaffold(
-        appBar: _buildAppBar(context, null),
+        appBar: AppBarBack(title: const Text('Formulario técnico')),
         body: AppErrorWidget(message: formState.failure!.message),
       );
     }
@@ -196,8 +209,8 @@ class _FormScaffold extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, FormEditorState? state) {
-    return AppBar(
+  AppBarBack _buildAppBar(BuildContext context, FormEditorState? state) {
+    return AppBarBack(
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,9 +1,6 @@
-// Este archivo usa material_ui en lugar de flutter/material.dart porque
-// flutter_form_builder v11 migró sus tipos (InputDecoration, DropdownMenuItem, etc.)
-// a package:material_ui. Mezclar ambos imports genera "type/*1*/ can't be assigned
-// to type/*2*/". Los demás archivos del proyecto siguen usando flutter/material.dart
-// sin problema gracias al MaterialUiCompatibilityBridge en app.dart.
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart' as mui
+    show InputDecoration, InputBorder, DropdownMenuItem;
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -12,9 +9,9 @@ import '../../domain/entities/form_template.dart';
 
 /// Motor de renderizado de campos de formulario dinámico.
 ///
-/// Cada [FormFieldDefinition] se convierte en el widget correcto
-/// de flutter_form_builder. Agregar un nuevo tipo de campo solo
-/// requiere extender el switch.
+/// Importa flutter/material.dart para los widgets del árbol (Material, Text, etc.)
+/// e importa material_ui solo para los tipos que flutter_form_builder v11 espera
+/// en sus parámetros (InputDecoration, DropdownMenuItem).
 class FormFieldWidget extends StatelessWidget {
   const FormFieldWidget({
     super.key,
@@ -31,24 +28,27 @@ class FormFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildField(context),
-          if (field.unit != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                'Unidad: ${field.unit}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
+    return Material(
+      type: MaterialType.transparency,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildField(context),
+            if (field.unit != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  'Unidad: ${field.unit}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -57,50 +57,40 @@ class FormFieldWidget extends StatelessWidget {
     switch (field.type) {
       case FormFieldType.text:
         return _buildTextField();
-
       case FormFieldType.textarea:
         return _buildTextAreaField();
-
       case FormFieldType.number:
         return _buildNumberField(isDecimal: false);
-
       case FormFieldType.decimal:
       case FormFieldType.measure:
         return _buildNumberField(isDecimal: true);
-
       case FormFieldType.select:
         return _buildSelectField();
-
       case FormFieldType.multiSelect:
         return _buildMultiSelectField();
-
       case FormFieldType.boolean:
         return _buildBooleanField();
-
       case FormFieldType.date:
         return _buildDateField();
-
       case FormFieldType.time:
         return _buildTimeField();
-
       case FormFieldType.photo:
         return _buildPhotoPlaceholder();
-
       case FormFieldType.materials:
         return _buildMaterialsPlaceholder();
     }
   }
 
-  // ── Campos concretos ────────────────────────────────────────────────────
+  // ── Campos ────────────────────────────────────────────────────────────────
 
   Widget _buildTextField() {
     return FormBuilderTextField(
       name: field.id,
       initialValue: initialValue?.toString(),
       enabled: enabled,
-      decoration: _decoration(),
+      decoration: _deco(),
       textCapitalization: TextCapitalization.sentences,
-      validator: _stringValidator(),
+      validator: _strValidator(),
       onChanged: (v) => onChanged(field.id, v),
     );
   }
@@ -111,9 +101,10 @@ class FormFieldWidget extends StatelessWidget {
       initialValue: initialValue?.toString(),
       enabled: enabled,
       maxLines: 4,
-      decoration: _decoration(),
+      minLines: 3,
+      decoration: _deco(),
       textCapitalization: TextCapitalization.sentences,
-      validator: _stringValidator(),
+      validator: _strValidator(),
       onChanged: (v) => onChanged(field.id, v),
     );
   }
@@ -124,37 +115,23 @@ class FormFieldWidget extends StatelessWidget {
       initialValue: initialValue?.toString(),
       enabled: enabled,
       keyboardType: TextInputType.numberWithOptions(decimal: isDecimal),
-      decoration: _decoration(
-        suffix: field.unit != null ? Text(field.unit!) : null,
-      ),
+      decoration: _deco(suffix: field.unit != null ? Text(field.unit!) : null),
       validator: FormBuilderValidators.compose([
         if (field.required) FormBuilderValidators.required(),
         if (isDecimal)
-          FormBuilderValidators.numeric(
-            errorText: 'Ingresa un número válido',
-          ),
+          FormBuilderValidators.numeric(errorText: 'Número inválido'),
         if (!isDecimal)
-          FormBuilderValidators.integer(
-            errorText: 'Ingresa un número entero',
-          ),
+          FormBuilderValidators.integer(errorText: 'Número entero requerido'),
         if (field.minValue != null)
-          FormBuilderValidators.min(
-            field.minValue!,
-            errorText: 'Mínimo: ${field.minValue}',
-          ),
+          FormBuilderValidators.min(field.minValue!,
+              errorText: 'Mínimo: ${field.minValue}'),
         if (field.maxValue != null)
-          FormBuilderValidators.max(
-            field.maxValue!,
-            errorText: 'Máximo: ${field.maxValue}',
-          ),
+          FormBuilderValidators.max(field.maxValue!,
+              errorText: 'Máximo: ${field.maxValue}'),
       ]),
       onChanged: (v) {
-        if (v == null || v.isEmpty) {
-          onChanged(field.id, null);
-          return;
-        }
-        final parsed = isDecimal ? double.tryParse(v) : int.tryParse(v);
-        onChanged(field.id, parsed ?? v);
+        if (v == null || v.isEmpty) { onChanged(field.id, null); return; }
+        onChanged(field.id, isDecimal ? double.tryParse(v) ?? v : int.tryParse(v) ?? v);
       },
     );
   }
@@ -164,25 +141,23 @@ class FormFieldWidget extends StatelessWidget {
       name: field.id,
       initialValue: initialValue?.toString(),
       enabled: enabled,
-      decoration: _decoration(),
-      validator: _stringValidator(),
+      decoration: _deco(),
+      validator: _strValidator(),
       items: field.options
-          .map((opt) => DropdownMenuItem(value: opt, child: Text(opt)))
+          .map((opt) => mui.DropdownMenuItem(value: opt, child: Text(opt)))
           .toList(),
       onChanged: (v) => onChanged(field.id, v),
     );
   }
 
   Widget _buildMultiSelectField() {
-    final currentValues = initialValue is List
+    final current = initialValue is List
         ? List<String>.from(initialValue as List)
         : <String>[];
-
-    // Renombrado a FormBuilderFilterChips (con 's') desde v10
     return FormBuilderFilterChips<String>(
       name: field.id,
-      initialValue: currentValues,
-      decoration: _decoration(),
+      initialValue: current,
+      decoration: _deco(),
       options: field.options
           .map((opt) => FormBuilderChipOption(value: opt, child: Text(opt)))
           .toList(),
@@ -193,60 +168,60 @@ class FormFieldWidget extends StatelessWidget {
   Widget _buildBooleanField() {
     return FormBuilderSwitch(
       name: field.id,
-      title: Text(
-        field.label,
-        style: const TextStyle(fontSize: 15),
-      ),
+      title: Text(field.label, style: const TextStyle(fontSize: 15)),
       initialValue: initialValue as bool? ?? false,
       enabled: enabled,
-      decoration: const InputDecoration(border: InputBorder.none),
+      decoration: const mui.InputDecoration(border: mui.InputBorder.none),
       onChanged: (v) => onChanged(field.id, v),
     );
   }
 
   Widget _buildDateField() {
     DateTime? initial;
-    if (initialValue is String) {
-      initial = DateTime.tryParse(initialValue as String);
-    }
+    if (initialValue is String) initial = DateTime.tryParse(initialValue as String);
     return FormBuilderDateTimePicker(
       name: field.id,
       initialValue: initial,
       enabled: enabled,
       inputType: InputType.date,
-      decoration: _decoration(),
-      // El validator de DateTimePicker recibe DateTime?, no String?
+      decoration: _deco(),
       validator: field.required
-          ? (DateTime? val) =>
-              val == null ? '${field.label} es requerido' : null
+          ? (DateTime? v) => v == null ? '${field.label} es requerido' : null
           : null,
-      onChanged: (v) => onChanged(
-        field.id,
-        v?.toUtc().toIso8601String(),
-      ),
+      onChanged: (v) => onChanged(field.id, v?.toUtc().toIso8601String()),
     );
   }
 
   Widget _buildTimeField() {
     DateTime? initial;
-    if (initialValue is String) {
-      initial = DateTime.tryParse(initialValue as String);
-    }
+    if (initialValue is String) initial = DateTime.tryParse(initialValue as String);
     return FormBuilderDateTimePicker(
       name: field.id,
       initialValue: initial,
       enabled: enabled,
       inputType: InputType.time,
-      decoration: _decoration(),
-      onChanged: (v) => onChanged(
-        field.id,
-        v?.toUtc().toIso8601String(),
-      ),
+      decoration: _deco(),
+      onChanged: (v) => onChanged(field.id, v?.toUtc().toIso8601String()),
     );
   }
 
-  /// Placeholder para campos de tipo foto — abre la sección de fotos.
-  Widget _buildPhotoPlaceholder() {
+  Widget _buildPhotoPlaceholder() => _placeholderTile(
+        icon: Icons.photo_camera_outlined,
+        label: field.label,
+        hint: 'Ver sección Fotografías',
+      );
+
+  Widget _buildMaterialsPlaceholder() => _placeholderTile(
+        icon: Icons.inventory_2_outlined,
+        label: field.label,
+        hint: 'Ver sección Materiales',
+      );
+
+  Widget _placeholderTile({
+    required IconData icon,
+    required String label,
+    required String hint,
+  }) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -255,16 +230,13 @@ class FormFieldWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.photo_camera_outlined, color: AppColors.textSecondary),
+          Icon(icon, color: AppColors.textSecondary),
           const SizedBox(width: AppSpacing.sm),
-          Text(
-            field.label,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
+          Text(label, style: const TextStyle(color: AppColors.textSecondary)),
           const Spacer(),
-          const Text(
-            'Ver sección Fotografías',
-            style: TextStyle(
+          Text(
+            hint,
+            style: const TextStyle(
               color: AppColors.primary,
               fontSize: 12,
               decoration: TextDecoration.underline,
@@ -275,48 +247,18 @@ class FormFieldWidget extends StatelessWidget {
     );
   }
 
-  /// Placeholder para campos de tipo materiales.
-  Widget _buildMaterialsPlaceholder() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.inventory_2_outlined, color: AppColors.textSecondary),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            field.label,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
-          const Spacer(),
-          const Text(
-            'Ver sección Materiales',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 12,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
-  // ── Helpers ─────────────────────────────────────────────────────────────
-
-  InputDecoration _decoration({Widget? suffix}) {
-    return InputDecoration(
+  /// Crea InputDecoration de material_ui (compatible con flutter_form_builder v11).
+  mui.InputDecoration _deco({Widget? suffix}) {
+    return mui.InputDecoration(
       labelText: field.required ? '${field.label} *' : field.label,
       hintText: field.hint,
       suffix: suffix,
     );
   }
 
-  /// Validador para campos de tipo String (text, textarea, select, etc.)
-  FormFieldValidator<String>? _stringValidator() {
+  FormFieldValidator<String>? _strValidator() {
     if (!field.required) return null;
     return FormBuilderValidators.required(
       errorText: '${field.label} es requerido',

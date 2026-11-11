@@ -136,6 +136,8 @@ class _VisitTypeIcon extends StatelessWidget {
     final (icon, color) = switch (visitType.toLowerCase()) {
       'energia' => (Icons.bolt_rounded, AppColors.warning),
       'datos' => (Icons.cable_rounded, AppColors.info),
+      'general' => (Icons.assignment_rounded, AppColors.primary),
+      'ups' => (Icons.battery_charging_full_rounded, AppColors.secondary),
       _ => (Icons.construction_rounded, AppColors.secondary),
     };
 

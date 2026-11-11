@@ -5,6 +5,7 @@ import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_utils.dart';
+import '../../../../core/widgets/app_bar_back.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/connectivity_banner.dart';
@@ -48,7 +49,7 @@ class VisitDetailPage extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBarBack(
         title: const Text('Detalle de visita'),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(28),
@@ -139,7 +140,7 @@ class _PhoneLayout extends StatelessWidget {
         children: [
           _VisitInfoCard(visit: visit),
           const SizedBox(height: AppSpacing.md),
-          _SectionGrid(visitId: visit.id),
+          _SectionGrid(visitId: visit.id, visitType: visit.visitType),
           const SizedBox(height: AppSpacing.md),
           _ActionBar(
             visit: visit,
@@ -195,7 +196,7 @@ class _TabletLayout extends StatelessWidget {
           flex: 3,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(0, AppSpacing.md, AppSpacing.md, AppSpacing.md),
-            child: _SectionGrid(visitId: visit.id),
+            child: _SectionGrid(visitId: visit.id, visitType: visit.visitType),
           ),
         ),
       ],
@@ -274,6 +275,10 @@ class _VisitInfoCard extends StatelessWidget {
 
   String _visitTypeLabel(String type) {
     switch (type.toLowerCase()) {
+      case 'general':
+        return 'Visita Técnica TEINS';
+      case 'ups':
+        return 'Informe Técnico UPS (CDP)';
       case 'energia':
         return 'Visita de Energía';
       case 'datos':
@@ -316,9 +321,10 @@ class _InfoRow extends StatelessWidget {
 
 /// Grid de accesos directos a las secciones de trabajo.
 class _SectionGrid extends StatelessWidget {
-  const _SectionGrid({required this.visitId});
+  const _SectionGrid({required this.visitId, required this.visitType});
 
   final String visitId;
+  final String visitType;
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +333,8 @@ class _SectionGrid extends StatelessWidget {
         Icons.assignment_outlined,
         'Formulario técnico',
         AppColors.primary,
-        AppRoutes.visitFormPath(visitId),
+        // Ir al selector de formularios (multi-formulario)
+        AppRoutes.visitFormSelectPath(visitId, visitType),
       ),
       (
         Icons.inventory_2_outlined,

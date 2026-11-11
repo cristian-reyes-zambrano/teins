@@ -51,16 +51,10 @@ class AnnotationLocalDatasourceImpl implements AnnotationLocalDatasource {
     try {
       await _db.execute(
         '''
-        INSERT INTO $_table (
+        INSERT OR REPLACE INTO $_table (
           id, visit_id, title, elements_json, base_image_path,
           canvas_width, canvas_height, sync_status, created_at, updated_at
         ) VALUES (?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO UPDATE SET
-          title          = excluded.title,
-          elements_json  = excluded.elements_json,
-          base_image_path= excluded.base_image_path,
-          sync_status    = excluded.sync_status,
-          updated_at     = excluded.updated_at
         ''',
         [
           model.id,

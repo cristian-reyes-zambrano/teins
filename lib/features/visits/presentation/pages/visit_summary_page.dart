@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_bar_back.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/utils/date_utils.dart';
@@ -22,7 +23,7 @@ class VisitSummaryPage extends ConsumerWidget {
     final visitAsync = ref.watch(visitByIdProvider(visitId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Resumen de visita')),
+      appBar: AppBarBack(title: const Text('Resumen de visita')),
       body: visitAsync.when(
         loading: () => const AppLoading(),
         error: (e, _) => const AppErrorWidget(message: 'Error al cargar.'),

@@ -24,9 +24,14 @@ class FormLocalDatasourceImpl implements FormLocalDatasource {
   static const _templatesTable = 'form_templates';
   static const _responsesTable = 'form_responses';
 
+  Future<void> _ensureInitialized() async {
+    if (!_db.isInitialized) await _db.initialize();
+  }
+
   @override
   Future<FormTemplateModel?> getTemplateByVisitType(String visitType) async {
     try {
+      await _ensureInitialized();
       final row = await _db.getOptional(
         'SELECT * FROM $_templatesTable '
         'WHERE visit_type = ? AND is_active = 1 '
@@ -49,6 +54,7 @@ class FormLocalDatasourceImpl implements FormLocalDatasource {
     int version,
   ) async {
     try {
+      await _ensureInitialized();
       final row = await _db.getOptional(
         'SELECT * FROM $_templatesTable WHERE id = ? AND version = ?',
         [id, version],
@@ -66,6 +72,7 @@ class FormLocalDatasourceImpl implements FormLocalDatasource {
   @override
   Future<FormResponseModel?> getResponse(String visitId) async {
     try {
+      await _ensureInitialized();
       final row = await _db.getOptional(
         'SELECT * FROM $_responsesTable WHERE visit_id = ? LIMIT 1',
         [visitId],
@@ -83,19 +90,14 @@ class FormLocalDatasourceImpl implements FormLocalDatasource {
   @override
   Future<void> upsertResponse(FormResponseModel model) async {
     try {
+      await _ensureInitialized();
       await _db.execute(
         '''
-        INSERT INTO $_responsesTable (
+        INSERT OR REPLACE INTO $_responsesTable (
           id, visit_id, template_id, template_version,
           responses_json, sync_status, is_complete,
           created_at, updated_at, completed_at
         ) VALUES (?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO UPDATE SET
-          responses_json = excluded.responses_json,
-          sync_status    = excluded.sync_status,
-          is_complete    = excluded.is_complete,
-          updated_at     = excluded.updated_at,
-          completed_at   = excluded.completed_at
         ''',
         [
           model.id,
@@ -152,13 +154,13 @@ class FormLocalDatasourceImpl implements FormLocalDatasource {
   @override
   Future<void> seedTemplate(FormTemplateModel model) async {
     try {
+      await _ensureInitialized();
       await _db.execute(
         '''
-        INSERT INTO $_templatesTable (
+        INSERT OR IGNORE INTO $_templatesTable (
           id, name, visit_type, version, sections_json, is_active,
           created_at, updated_at
         ) VALUES (?,?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO NOTHING
         ''',
         [
           model.id,

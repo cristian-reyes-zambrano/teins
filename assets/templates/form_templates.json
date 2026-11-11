@@ -1,5 +1,239 @@
 [
   {
+    "id": "teins_visita_v1",
+    "name": "Formato Visita Técnica TEINS",
+    "visit_type": "general",
+    "version": 1,
+    "sections": [
+      {
+        "id": "datos_servicio",
+        "title": "Datos del Servicio",
+        "order": 0,
+        "fields": [
+          {"id": "cliente", "type": "text", "label": "Cliente", "required": true},
+          {"id": "nit", "type": "text", "label": "NIT", "required": false},
+          {"id": "orden_servicio", "type": "text", "label": "Orden de Servicio", "required": false},
+          {"id": "direccion", "type": "text", "label": "Dirección", "required": true},
+          {"id": "ciudad", "type": "text", "label": "Ciudad", "required": false},
+          {"id": "sede", "type": "text", "label": "Sede", "required": false},
+          {"id": "solicitante", "type": "text", "label": "Solicitante", "required": false},
+          {"id": "telefono", "type": "text", "label": "Teléfono", "required": false},
+          {"id": "fecha_servicio", "type": "date", "label": "Fecha de Servicio", "required": true},
+          {"id": "hora_inicio", "type": "time", "label": "Hora Inicio", "required": true},
+          {"id": "hora_final", "type": "time", "label": "Hora Final", "required": false}
+        ]
+      },
+      {
+        "id": "sistema_revisado",
+        "title": "Sistema Revisado",
+        "order": 1,
+        "fields": [
+          {
+            "id": "sistemas",
+            "type": "multiSelect",
+            "label": "Sistema(s) revisado(s)",
+            "required": true,
+            "options": ["Control Acceso", "CCTV", "UPS", "Alarma", "Red Datos", "Red Energía", "Otro"]
+          },
+          {"id": "sistema_otro_descripcion", "type": "text", "label": "Descripción del otro sistema", "required": false}
+        ]
+      },
+      {
+        "id": "diagnostico",
+        "title": "Diagnóstico Técnico",
+        "order": 2,
+        "fields": [
+          {"id": "estado_inicial", "type": "textarea", "label": "Estado Inicial", "required": true, "hint": "Describe el estado en que se encontró el equipo/sistema"},
+          {"id": "diagnostico", "type": "textarea", "label": "Diagnóstico", "required": true, "hint": "Describe el diagnóstico realizado"},
+          {"id": "correccion", "type": "textarea", "label": "Corrección", "required": false, "hint": "Describe la corrección aplicada"}
+        ]
+      },
+      {
+        "id": "resultado",
+        "title": "Resultado del Servicio",
+        "order": 3,
+        "fields": [
+          {
+            "id": "solucionado",
+            "type": "select",
+            "label": "Estado de la solución",
+            "required": true,
+            "options": ["Totalmente solucionado", "Parcialmente solucionado", "No solucionado", "Solucionado remotamente", "Reprogramar visita"]
+          },
+          {"id": "se_emplearon_materiales", "type": "boolean", "label": "¿Se emplearon materiales o equipos?", "required": true},
+          {"id": "descripcion_materiales", "type": "textarea", "label": "Descripción de materiales/equipos empleados", "required": false, "hint": "Cantidad, referencia, modelo, serial, etc."}
+        ]
+      },
+      {
+        "id": "observaciones_adicionales",
+        "title": "Observaciones Adicionales",
+        "order": 4,
+        "fields": [
+          {"id": "observaciones_adicionales", "type": "textarea", "label": "Observaciones adicionales", "required": false},
+          {"id": "nombre_tecnico", "type": "text", "label": "Nombre del técnico que asistió", "required": true},
+          {"id": "nombre_acompanante", "type": "text", "label": "Nombre acompañante (cliente)", "required": false},
+          {"id": "nombre_supervisor", "type": "text", "label": "Supervisado/validado por", "required": false}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ups_cdp_v1",
+    "name": "Informe Técnico UPS (CDP)",
+    "visit_type": "ups",
+    "version": 1,
+    "sections": [
+      {
+        "id": "encabezado",
+        "title": "Encabezado del Informe",
+        "order": 0,
+        "fields": [
+          {"id": "ticket_no", "type": "text", "label": "Ticket No.", "required": false},
+          {"id": "os_numero", "type": "text", "label": "O.S. No.", "required": false},
+          {
+            "id": "tipo_servicio",
+            "type": "multiSelect",
+            "label": "Tipo de Servicio",
+            "required": true,
+            "options": ["Instalación", "Overhaul", "Correctivo", "Preventivo", "Cambio Baterías"]
+          },
+          {"id": "cliente", "type": "text", "label": "Cliente", "required": true},
+          {"id": "fecha", "type": "date", "label": "Fecha", "required": true},
+          {"id": "ciudad", "type": "text", "label": "Ciudad", "required": false},
+          {"id": "oficina", "type": "text", "label": "Oficina", "required": false},
+          {"id": "encargado", "type": "text", "label": "Encargado", "required": false},
+          {"id": "telefono", "type": "text", "label": "Teléfono", "required": false},
+          {"id": "ingeniero_tecnico", "type": "text", "label": "Ingeniero/Técnico", "required": false}
+        ]
+      },
+      {
+        "id": "identificacion_equipo",
+        "title": "Identificación del Equipo",
+        "order": 1,
+        "fields": [
+          {"id": "capacidad", "type": "text", "label": "Capacidad", "required": false},
+          {"id": "marca", "type": "text", "label": "Marca", "required": false},
+          {"id": "modelo", "type": "text", "label": "Modelo", "required": false},
+          {"id": "serial", "type": "text", "label": "Serial", "required": false},
+          {"id": "no_sim_card", "type": "text", "label": "No. de SIM Card", "required": false}
+        ]
+      },
+      {
+        "id": "diagnostico",
+        "title": "Diagnóstico",
+        "order": 2,
+        "fields": [
+          {"id": "dano_reportado", "type": "textarea", "label": "Daño reportado por el cliente", "required": false},
+          {"id": "estado_inicial", "type": "textarea", "label": "Estado inicial del equipo", "required": false}
+        ]
+      },
+      {
+        "id": "estado_conexion",
+        "title": "Estado de la Conexión",
+        "order": 3,
+        "fields": [
+          {"id": "tablero_electrico", "type": "text", "label": "Tablero Eléctrico", "required": false},
+          {"id": "tomas_clavijas", "type": "text", "label": "Tomas y clavijas", "required": false},
+          {"id": "barrajes", "type": "text", "label": "Barrajes", "required": false},
+          {"id": "breakers", "type": "text", "label": "Breakers", "required": false},
+          {"id": "bypass_externo", "type": "text", "label": "Bypass Externo", "required": false},
+          {"id": "rack_baterias", "type": "text", "label": "Rack de Baterías", "required": false}
+        ]
+      },
+      {
+        "id": "acometida",
+        "title": "Acometida",
+        "order": 4,
+        "fields": [
+          {"id": "voltaje_f1_fnac", "type": "decimal", "label": "Voltaje F-NAC F1 (V)", "required": false, "unit": "V"},
+          {"id": "voltaje_f2_fnac", "type": "decimal", "label": "Voltaje F-NAC F2 (V)", "required": false, "unit": "V"},
+          {"id": "voltaje_f3_fnac", "type": "decimal", "label": "Voltaje F-NAC F3 (V)", "required": false, "unit": "V"},
+          {"id": "corriente_entrada_f1", "type": "decimal", "label": "Corriente entrada F1 (A)", "required": false, "unit": "A"},
+          {"id": "corriente_entrada_f2", "type": "decimal", "label": "Corriente entrada F2 (A)", "required": false, "unit": "A"},
+          {"id": "corriente_entrada_f3", "type": "decimal", "label": "Corriente entrada F3 (A)", "required": false, "unit": "A"},
+          {"id": "n_tac", "type": "decimal", "label": "N-TAC (V)", "required": false, "unit": "V"},
+          {"id": "f_f", "type": "decimal", "label": "F-F (V)", "required": false, "unit": "V"},
+          {"id": "neutro_aislado", "type": "boolean", "label": "Neutro Aislado", "required": false},
+          {"id": "hz", "type": "decimal", "label": "HZ", "required": false, "unit": "Hz"}
+        ]
+      },
+      {
+        "id": "pruebas_equipo",
+        "title": "Pruebas del Equipo",
+        "order": 5,
+        "fields": [
+          {"id": "voltaje_flotacion_f1", "type": "decimal", "label": "Voltaje flotación F1 (V)", "required": false, "unit": "V"},
+          {"id": "voltaje_flotacion_f2", "type": "decimal", "label": "Voltaje flotación F2 (V)", "required": false, "unit": "V"},
+          {"id": "voltaje_flotacion_f3", "type": "decimal", "label": "Voltaje flotación F3 (V)", "required": false, "unit": "V"},
+          {"id": "voltaje_salida_ff", "type": "decimal", "label": "Voltaje salida F-F (V)", "required": false, "unit": "V"},
+          {"id": "corriente_salida_f1", "type": "decimal", "label": "Corriente salida F1 (A)", "required": false, "unit": "A"},
+          {"id": "corriente_salida_f2", "type": "decimal", "label": "Corriente salida F2 (A)", "required": false, "unit": "A"},
+          {"id": "corriente_salida_f3", "type": "decimal", "label": "Corriente salida F3 (A)", "required": false, "unit": "A"},
+          {"id": "porcentaje_carga", "type": "decimal", "label": "Porcentaje de carga (%)", "required": false, "unit": "%"},
+          {"id": "hz_salida", "type": "decimal", "label": "HZ salida", "required": false, "unit": "Hz"},
+          {"id": "queda_funcionando", "type": "boolean", "label": "¿Queda funcionando?", "required": true},
+          {"id": "limpieza_equipo", "type": "select", "label": "Limpieza del equipo", "required": false, "options": ["Realizada", "No realizada", "Parcial"]},
+          {"id": "limpieza_baterias", "type": "select", "label": "Limpieza de baterías", "required": false, "options": ["Realizada", "No realizada", "Parcial"]},
+          {"id": "soporte_equipo_carga", "type": "select", "label": "Soporte del equipo con carga", "required": false, "options": ["Soporta", "No soporta", "Parcial"]},
+          {"id": "bypass_equipo", "type": "select", "label": "Bypass del equipo", "required": false, "options": ["Funciona", "No funciona", "No aplica"]},
+          {"id": "estado_final", "type": "textarea", "label": "Estado final del equipo", "required": false}
+        ]
+      },
+      {
+        "id": "causas_correctivo",
+        "title": "Causas del Correctivo",
+        "order": 6,
+        "fields": [
+          {
+            "id": "causas",
+            "type": "multiSelect",
+            "label": "Causas del correctivo",
+            "required": false,
+            "options": [
+              "Breakers", "Bypass externo", "Bypass interno",
+              "Cargador (control)", "Cargador (potencial)",
+              "Inversor (control)", "Inversor (potencial)",
+              "Baterías", "Ventiladores", "Externo", "Otros"
+            ]
+          },
+          {"id": "descripcion_causa", "type": "textarea", "label": "Descripción detallada de la causa", "required": false}
+        ]
+      },
+      {
+        "id": "informe_baterias",
+        "title": "Informe de Baterías",
+        "order": 7,
+        "fields": [
+          {"id": "marca_bateria", "type": "text", "label": "Marca", "required": false},
+          {"id": "referencia_bateria", "type": "text", "label": "Referencia", "required": false},
+          {"id": "cantidad_baterias", "type": "number", "label": "Cantidad", "required": false},
+          {"id": "voltaje_bateria", "type": "decimal", "label": "Voltaje (V)", "required": false, "unit": "V"},
+          {"id": "ah_bateria", "type": "decimal", "label": "AH", "required": false, "unit": "Ah"},
+          {"id": "estacionaria", "type": "boolean", "label": "¿Estacionaria?", "required": false},
+          {"id": "selladas", "type": "boolean", "label": "¿Selladas?", "required": false},
+          {"id": "estado_bateria", "type": "select", "label": "Estado", "required": false, "options": ["Bueno", "Regular", "Deficiente", "Requiere cambio"]},
+          {"id": "no_bancos", "type": "number", "label": "No. de Bancos", "required": false},
+          {"id": "conexiones_bateria", "type": "text", "label": "Conexiones", "required": false},
+          {"id": "estado_bornes", "type": "select", "label": "Estado de bornes", "required": false, "options": ["Bueno", "Regular", "Oxidado", "Requiere limpieza"]}
+        ]
+      },
+      {
+        "id": "trabajo_observaciones",
+        "title": "Trabajo Realizado y Observaciones",
+        "order": 8,
+        "fields": [
+          {"id": "trabajo_realizado", "type": "textarea", "label": "Describa el trabajo realizado", "required": true},
+          {"id": "observaciones_recomendaciones", "type": "textarea", "label": "Observaciones técnicas / Recomendaciones", "required": false},
+          {"id": "hora_entrada", "type": "time", "label": "Hora de entrada", "required": false},
+          {"id": "hora_salida", "type": "time", "label": "Hora de salida", "required": false},
+          {"id": "nombre_ingeniero", "type": "text", "label": "Nombre del Ingeniero/Técnico", "required": true},
+          {"id": "nombre_cliente_firma", "type": "text", "label": "Nombre y Sello del Cliente", "required": false},
+          {"id": "revisado_por", "type": "text", "label": "Revisado por", "required": false}
+        ]
+      }
+    ]
+  },
+  {
     "id": "infraestructura_v1",
     "name": "Inspección de Infraestructura",
     "visit_type": "infraestructura",

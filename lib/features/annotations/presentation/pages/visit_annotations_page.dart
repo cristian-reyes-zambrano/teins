@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_bar_back.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/connectivity_banner.dart';
 import '../providers/annotation_providers.dart';
@@ -26,7 +27,7 @@ class VisitAnnotationsPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[900],
-      appBar: AppBar(
+      appBar: AppBarBack(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Column(

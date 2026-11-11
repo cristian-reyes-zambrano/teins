@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/auth_controller.dart';
+import '../../domain/entities/user_profile.dart';
 import '../providers/auth_providers.dart';
 
-/// Pantalla de splash: verifica sesión y redirige.
+/// Pantalla de splash: decide en milisegundos si hay sesión activa.
 ///
-/// Aparece brevemente al iniciar la app mientras se comprueba
-/// si existe una sesión persistida. No muestra lógica de negocio.
+/// Lee la sesión local de Supabase (sin red) y navega inmediatamente.
+/// PowerSync se inicializa en background sin bloquear la UI.
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
@@ -21,33 +23,53 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Verificar sesión en el siguiente frame para que el widget esté montado.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkSession());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _decide());
   }
 
-  Future<void> _checkSession() async {
-    await ref.read(authControllerProvider.notifier).checkSession();
+  void _decide() {
+    if (!mounted) return;
+
+    try {
+      // Leer sesión local — sin llamada de red, instantáneo
+      final session = Supabase.instance.client.auth.currentSession;
+
+      if (session != null) {
+        // Hay sesión guardada: construir usuario desde metadata local
+        final user = session.user;
+        final meta = user.userMetadata ?? {};
+        final profile = UserProfile(
+          id: user.id,
+          email: user.email ?? '',
+          role: UserRole.fromString(meta['role'] as String? ?? 'technician'),
+          fullName: meta['full_name'] as String?,
+        );
+
+        // Actualizar el controller con el usuario
+        ref.read(authControllerProvider.notifier).setUserFromSession(profile);
+
+        // Inicializar PowerSync en background
+        Future(() => ref
+            .read(authControllerProvider.notifier)
+            .initPowerSyncInBackground());
+
+        context.go(AppRoutes.home);
+      } else {
+        context.go(AppRoutes.login);
+      }
+    } catch (e) {
+      // Supabase no inicializado o error — ir al login
+      context.go(AppRoutes.login);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Escuchar cambios de estado para navegar en cuanto tengamos respuesta.
-    ref.listen<AuthState>(authControllerProvider, (_, state) {
-      if (!mounted) return;
-      if (state is AuthAuthenticated) {
-        context.go(AppRoutes.home);
-      } else if (state is AuthUnauthenticated || state is AuthError) {
-        context.go(AppRoutes.login);
-      }
-    });
-
     return Scaffold(
       backgroundColor: AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo placeholder — reemplazar con imagen real
             Container(
               width: 100,
               height: 100,

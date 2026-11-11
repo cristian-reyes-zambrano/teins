@@ -1,3 +1,5 @@
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:powersync/powersync.dart';
 import 'package:sqlite_async/sqlite_async.dart' show SqliteWriteContext;
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
@@ -43,9 +45,16 @@ class PowerSyncService {
 
     AppLogger.i('Inicializando PowerSync...');
 
+    // Obtener la ruta completa del directorio de documentos de la app.
+    // En Android/iOS no se puede usar un nombre de archivo sin ruta absoluta.
+    final dir = await getApplicationDocumentsDirectory();
+    final dbPath = p.join(dir.path, AppConstants.kDbName);
+
+    AppLogger.d('Ruta de base de datos: $dbPath');
+
     _db = PowerSyncDatabase(
       schema: schema,
-      path: AppConstants.kDbName,
+      path: dbPath,
     );
 
     await _db!.initialize();

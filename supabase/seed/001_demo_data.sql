@@ -15,8 +15,8 @@
 
 DO $$
 DECLARE
-    v_tech_id        UUID := '00000000-0000-4000-8000-000000000001';
-    v_office_id      UUID := '00000000-0000-4000-8000-000000000002';
+    v_tech_id        UUID := 'a9c8bb91-26b0-4169-9495-13bb569929cf';
+    v_office_id      UUID := '30d254c7-0b1e-433b-ace6-421bb011d2da';
     v_template_infra UUID := '10000000-0000-4000-8000-000000000001';
     v_template_energ UUID := '10000000-0000-4000-8000-000000000002';
     v_template_datos UUID := '10000000-0000-4000-8000-000000000003';

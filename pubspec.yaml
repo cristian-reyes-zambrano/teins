@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations:
+    sdk: flutter
+
   # ── Supabase ──────────────────────────────────────────────────────────────
   supabase_flutter: ^2.8.4
 

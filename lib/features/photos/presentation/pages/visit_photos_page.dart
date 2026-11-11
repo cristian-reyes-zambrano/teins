@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_bar_back.dart';
 import '../../../../core/widgets/app_error_widget.dart';
 import '../../../../core/widgets/app_loading.dart';
 import '../../../../core/widgets/connectivity_banner.dart';
@@ -52,7 +53,7 @@ class VisitPhotosPage extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBarBack(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

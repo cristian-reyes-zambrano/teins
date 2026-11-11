@@ -29,6 +29,15 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
   static const _catalog = 'material_catalog';
   static const _visitMaterials = 'visit_materials';
 
+  /// Garantiza que PowerSync esté inicializado antes de cualquier query.
+  /// Los materiales solo se pueden consultar después del login/demo mode.
+  Future<void> _ensureInitialized() async {
+    if (!_db.isInitialized) {
+      AppLogger.w('MaterialDatasource: PowerSync no inicializado, inicializando...');
+      await _db.initialize();
+    }
+  }
+
   @override
   Future<List<CatalogMaterialModel>> searchCatalog({
     String query = '',
@@ -37,6 +46,7 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
     int offset = 0,
   }) async {
     try {
+      await _ensureInitialized();
       // Normaliza la búsqueda: LOWER() para insensibilidad a mayúsculas.
       // Para tildes, el técnico puede buscar con o sin tilde — se compara
       // el texto usando LIKE que en SQLite es insensible en ASCII pero
@@ -76,6 +86,7 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
   @override
   Future<List<String>> getCategories() async {
     try {
+      await _ensureInitialized();
       final rows = await _db.getAll(
         'SELECT DISTINCT category FROM $_catalog '
         'WHERE category IS NOT NULL AND is_active = 1 '
@@ -92,6 +103,11 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
 
   @override
   Stream<List<VisitMaterialModel>> watchVisitMaterials(String visitId) {
+    // Para streams, usamos un stream que emite vacío si no está inicializado
+    // y redirige a la BD cuando esté lista.
+    if (!_db.isInitialized) {
+      return Stream.value(<VisitMaterialModel>[]);
+    }
     return _db
         .watch(
           'SELECT * FROM $_visitMaterials WHERE visit_id = ? '
@@ -104,6 +120,7 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
   @override
   Future<List<VisitMaterialModel>> getVisitMaterials(String visitId) async {
     try {
+      await _ensureInitialized();
       final rows = await _db.getAll(
         'SELECT * FROM $_visitMaterials WHERE visit_id = ? '
         'ORDER BY created_at ASC',
@@ -121,17 +138,13 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
   @override
   Future<void> upsertVisitMaterial(VisitMaterialModel model) async {
     try {
+      await _ensureInitialized();
       await _db.execute(
         '''
-        INSERT INTO $_visitMaterials (
+        INSERT OR REPLACE INTO $_visitMaterials (
           id, visit_id, material_id, material_code, material_name,
           unit, quantity, observations, sync_status, created_at, updated_at
         ) VALUES (?,?,?,?,?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO UPDATE SET
-          quantity      = excluded.quantity,
-          observations  = excluded.observations,
-          sync_status   = excluded.sync_status,
-          updated_at    = excluded.updated_at
         ''',
         [
           model.id,
@@ -223,11 +236,11 @@ class MaterialLocalDatasourceImpl implements MaterialLocalDatasource {
   @override
   Future<void> seedCatalogMaterial(CatalogMaterialModel model) async {
     try {
+      await _ensureInitialized();
       await _db.execute(
         '''
-        INSERT INTO $_catalog (id, code, name, description, unit, category, is_active)
+        INSERT OR IGNORE INTO $_catalog (id, code, name, description, unit, category, is_active)
         VALUES (?,?,?,?,?,?,?)
-        ON CONFLICT(id) DO NOTHING
         ''',
         [
           model.id,

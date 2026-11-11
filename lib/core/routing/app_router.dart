@@ -8,6 +8,7 @@ import '../../features/authentication/presentation/pages/splash_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/visits/presentation/pages/visits_list_page.dart';
 import '../../features/visits/presentation/pages/visit_detail_page.dart';
+import '../../features/dynamic_forms/presentation/pages/form_selector_page.dart';
 import '../../features/dynamic_forms/presentation/pages/visit_form_page.dart';
 import '../../features/materials/presentation/pages/visit_materials_page.dart';
 import '../../features/photos/presentation/pages/visit_photos_page.dart';
@@ -66,7 +67,27 @@ class AppRouter {
                 path: 'form',
                 builder: (context, state) {
                   final visitId = state.pathParameters['visitId']!;
-                  return VisitFormPage(visitId: visitId);
+                  // Soporte para multi-formulario: templateId y visitType
+                  // se pasan como query params desde FormSelectorPage.
+                  final templateId = state.uri.queryParameters['templateId'];
+                  final visitType = state.uri.queryParameters['visitType'];
+                  return VisitFormPage(
+                    visitId: visitId,
+                    overrideTemplateId: templateId,
+                    overrideVisitType: visitType,
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'form-select',
+                builder: (context, state) {
+                  final visitId = state.pathParameters['visitId']!;
+                  final visitType =
+                      state.uri.queryParameters['visitType'] ?? 'general';
+                  return FormSelectorPage(
+                    visitId: visitId,
+                    visitType: visitType,
+                  );
                 },
               ),
               GoRoute(

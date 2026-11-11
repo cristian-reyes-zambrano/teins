@@ -21,9 +21,11 @@ class _CreateVisitDialogState extends ConsumerState<CreateVisitDialog> {
   final _titleController = TextEditingController();
   final _clientController = TextEditingController();
   final _addressController = TextEditingController();
-  String _selectedType = 'infraestructura';
+  String _selectedType = 'general';
 
   static const _visitTypes = [
+    ('general', 'Visita Técnica TEINS', Icons.assignment_rounded),
+    ('ups', 'Informe UPS (CDP)', Icons.battery_charging_full_rounded),
     ('infraestructura', 'Infraestructura', Icons.construction_rounded),
     ('energia', 'Energía', Icons.bolt_rounded),
     ('datos', 'Datos / Red', Icons.cable_rounded),

@@ -68,6 +68,11 @@ class _VisitsListPageState extends ConsumerState<VisitsListPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mis visitas'),
+        leading: IconButton(
+          icon: const Icon(Icons.home_rounded),
+          tooltip: 'Inicio',
+          onPressed: () => context.go(AppRoutes.home),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(
             28 + // Banner conectividad
